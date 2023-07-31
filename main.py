@@ -6,7 +6,7 @@ from render import render, render_part, real_time_tool
 
 def parse_args():
     parser = argparse.ArgumentParser('Point Cloud Visualizer')
-    parser.add_argument('--path', type=str, help='the input file path', default='plane.ply')
+    parser.add_argument('--path', type=str, help='the input file path', default='out_596.ply')
     parser.add_argument('--render', help='using mitsuba to create beautiful image with shadow', action='store_true')
     parser.add_argument('--tool', help='using real time point cloud visualization tools', action='store_true')
     parser.add_argument('--num', type=int, help='downsample point num', default=np.inf)
@@ -32,13 +32,49 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+def visualize_pointcloud(points, normals=None,out_file=None, show=False, elev=30, azim=225):
+    r''' Visualizes point cloud data.
+    Args:
+    points (tensor): point data
+    normals (tensor): normal data (if existing)
+    out_file (string): output file
+    show (bool): whether the plot should be shown
+    '''
+    # Create plot
+    fig = plt.figure()
+    ax = fig.gca(projection=Axes3D.name)
+    ax.scatter(points[:, 2], points[:, 0], points[:, 1])
+    if normals is not None:
+        ax.quiver(
+            points[:, 2], points[:, 0], points[:, 1],
+            normals[:, 2], normals[:, 0], normals[:, 1],
+            length=0.1, color='k'
+        )
+    ax.set_xlabel('Z')
+    ax.set_ylabel('X')
+    ax.set_zlabel('Y')
+    # ax.set_xlim(-0.5, 0.5)
+    # ax.set_ylim(-0.5, 0.5)
+    # ax.set_zlim(-0.5, 0.5)
+    ax.view_init(elev=elev, azim=azim)
+    if out_file is not None:
+        plt.savefig(out_file)
+    if show:
+        plt.show()
+    plt.close(fig)
 
 def main():
     config = parse_args()
-    if config.render and config.tool:
-        raise RuntimeWarning('both render and real time tool are selected')
-    if config.render is False and config.tool is False:
-        raise RuntimeWarning('you need to choose one of render or real time tool')
+    # if config.render and config.tool:
+    #     raise RuntimeWarning('both render and real time tool are selected')
+    # if config.render is False and config.tool is False:
+    #     raise RuntimeWarning('you need to choose one of render or real time tool')
 
     # load the point cloud
     pcl = load(config.path, config.separator)
@@ -55,12 +91,14 @@ def main():
     # color the point cloud
     pcl = color_map(config, pcl)
 
-    if config.part:
-        render_part(config, pcl)
-    elif config.render:
-        render(config, pcl)
-    else:
-        real_time_tool(config, pcl[:, :3])
+    render(config, pcl)
+
+    # if config.part:
+    #     render_part(config, pcl)
+    # elif config.render:
+    #     render(config, pcl)
+    # else:
+    #     real_time_tool(config, pcl[:, :3])
 
 
 if __name__ == '__main__':

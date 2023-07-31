@@ -24,9 +24,9 @@ def onmouse(*args):
 	mousex=x/float(showsz) * 2
 	mousey=y/float(showsz) * 2
 	changed=True
-cv2.namedWindow('show3d')
-cv2.moveWindow('show3d',0,0)
-cv2.setMouseCallback('show3d',onmouse)
+# cv2.namedWindow("show3d", cv2.WINDOW_NORMAL)
+# cv2.moveWindow('show3d',0,0)
+# cv2.setMouseCallback('show3d',onmouse)
 def showpoints(xyz, config, c0=None,c1=None,c2=None,waittime=0,showrot=False,magnifyBlue=0,freezerot=False,background=(0,0,0),normalizecolor=True):
 	global showsz,mousex,mousey,zoom,changed
 	xyz=xyz-xyz.mean(axis=0)
@@ -93,7 +93,7 @@ def showpoints(xyz, config, c0=None,c1=None,c2=None,waittime=0,showrot=False,mag
 		if changed:
 			result = render()
 			changed=False
-		cv2.imshow('show3d',show)
+		# cv2.imshow('show3d',show)
 		if waittime==0:
 			cmd=cv2.waitKey(10)%256
 		else:
